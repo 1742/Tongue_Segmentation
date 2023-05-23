@@ -20,8 +20,10 @@ class MyDatasets(Dataset):
         return len(self.img_names)
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.data_path + '\\image', self.img_names[index])).convert('RGB')
-        target = Image.open(os.path.join(self.data_path + '\\label', self.img_names[index])).convert('P')
+        img_name, label = self.img_names[index].split(' ')
+        img_path = os.path.join(self.data_path, label)
+        img = Image.open(os.path.join(img_path + '\\image', img_name)).convert('RGB')
+        target = Image.open(os.path.join(img_path + '\\tongue', img_name)).convert('L')
         # 数据增强
         img, target = self.transformers(img, target)
         # 若target时灰度图或P图时，增加一个通道维度
@@ -31,14 +33,38 @@ class MyDatasets(Dataset):
         return img, target
 
 
+def shuffle(data: list):
+    np.random.shuffle(data)
+    return data
+
+
 if __name__ == '__main__':
-    data_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data\train'
-    img_names = os.listdir(os.path.join(data_path, 'image'))
+    data_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data'
+    img_names_txt = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data\img_names.txt'
+
+    if not os.path.exists(img_names_txt):
+        img_names = []
+        for sx_img_name in os.listdir(os.path.join(data_path, 'sx\\image')):
+            img_names.append(sx_img_name + ' sx')
+        for xx_img_name in os.listdir(os.path.join(data_path, 'xx\\image')):
+            img_names.append(xx_img_name + ' xx')
+
+        with open(img_names_txt, 'w', encoding='utf-8') as f:
+            for img_name in img_names:
+                f.write(img_name)
+                f.write('\n')
+
+        print('Successfully generated img_names.txt in {}'.format(img_names_txt))
+
+    img_names = []
+    with open(img_names_txt, 'r', encoding='utf-8') as f:
+        for img_name in f.readlines():
+            img_names.append(img_name.strip())
 
     transformers = [
-        Resize(224),
+        Resize((224, 224)),
         # RandomHorizontalFlip(),
-        RGBToHSV(),
+        # RGBToHSV(),
         ToTensor()
     ]
 

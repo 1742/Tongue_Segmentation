@@ -36,15 +36,15 @@ class Unet(nn.Module):
         # 下采样
         x1 = self.conv1(x)
         x2 = self.conv2(self.down_sample(x1))
-        x3 = self.conv3(self.dropout(self.down_sample(x2)))
+        x3 = self.conv3(self.down_sample(x2))
         x4 = self.conv4(self.down_sample(x3))
-        x5 = self.conv5(self.dropout(self.down_sample(x4)))
+        x5 = self.conv5(self.down_sample(x4))
 
         # 上采样
-        x6 = self.up_conv1(x4, x5)
-        x7 = self.up_conv2(x3, x6)
-        x8 = self.up_conv3(x2, x7)
-        x9 = self.up_conv4(x1, x8)
+        x6 = self.dropout(self.up_conv1(x4, x5))
+        x7 = self.dropout(self.up_conv2(x3, x6))
+        x8 = self.dropout(self.up_conv3(x2, x7))
+        x9 = self.dropout(self.up_conv4(x1, x8))
 
         x = self.conv7(x9)
         x = self.output(x)

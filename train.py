@@ -6,7 +6,7 @@ from model.Unet import *
 from tools.my_loss import Dice, BCE_and_Dice_Loss
 
 from torch.utils.data import Dataset, DataLoader
-from tools.dataloader import MyDatasets
+from tools.dataloader import MyDatasets, shuffle
 from torchvision import transforms
 from tools import Mytransforms
 import numpy as np
@@ -18,18 +18,19 @@ from tqdm import tqdm
 from tools.evaluation_index import Accuracy, mIOU, Visualization
 
 
-data_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data\train'
+data_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data'
+img_names_txt = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data\img_names.txt'
 cfg_file = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\config.json'
 indicator_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs'
-pretrained_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\Unet.pth'
-save_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model'
-effect_path = r'runs/effect.json'
-save_figure_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs\result.png'
+pretrained_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\model_1\Unet.pth'
+save_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\model_1'
+effect_path = r'runs/effect_1\effect.json'
+save_figure_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs\result\result_1\result.png'
 
-learning_rate = 1e-3
+learning_rate = 1e-4
 weight_decay = 1e-8
 epochs = 5
-batch_size = 16
+batch_size = 32
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('The train will run in {} ...'.format(device))
 pretrained = False
@@ -66,8 +67,8 @@ def train(
 
     if pretrained:
         if os.path.exists(pretrained_path):
-            model.load_state_dict(torch.load(pretrained_path))
-            print('Successfully load pretrained model from {}!'.format(pretrained_path))
+            model.load_state_dict(torch.load(pretrained_path, torch.device(device)))
+            print('Successfully load pretrained model from {}'.format(pretrained_path))
         else:
             print('model parameters files is not exist!')
             sys.exit(0)
@@ -194,18 +195,39 @@ def train(
 
 
 if __name__ == '__main__':
+    # 读取图片名
+    if not os.path.exists(img_names_txt):
+        img_names = []
+        for sx_img_name in os.listdir(os.path.join(data_path, 'sx\\image')):
+            img_names.append(sx_img_name + ' sx')
+        for xx_img_name in os.listdir(os.path.join(data_path, 'xx\\image')):
+            img_names.append(xx_img_name + ' xx')
+
+        with open(img_names_txt, 'w', encoding='utf-8') as f:
+            for img_name in img_names:
+                f.write(img_name)
+                f.write('\n')
+
+        print('Successfully generated img_names.txt in {}'.format(img_names_txt))
+
+    img_names = []
+    with open(img_names_txt, 'r', encoding='utf-8') as f:
+        for img_name in f.readlines():
+            img_names.append(img_name.strip())
+    print('Successfully read image names from {}'.format(img_names_txt))
+    img_names = shuffle(img_names)
+
     # 划分数据集
-    data_names = os.listdir(os.path.join(data_path, 'image'))
-    data_num = len(data_names)
-    train_data = data_names[:int(data_num * 0.7)]
-    val_data = data_names[int(data_num * 0.7):int(data_num * 0.9)]
-    test_data = data_names[int(data_num * 0.9):]
+    data_num = len(img_names)
+    train_data = img_names[:int(data_num * 0.7)]
+    val_data = img_names[int(data_num * 0.7):int(data_num * 0.9)]
+    test_data = img_names[int(data_num * 0.9):]
     print('train_data_num:', len(train_data))
     print('val_data_num:', len(val_data))
     print('test_data_num:', len(test_data))
 
     transformers = [
-        Mytransforms.Resize(224),
+        Mytransforms.Resize((224, 224)),
         # Mytransforms.RandomHorizontalFlip(),
         # Mytransforms.RGBToHSV(),
         Mytransforms.ToTensor()
@@ -222,7 +244,8 @@ if __name__ == '__main__':
     optimizer = 'Adam'
     # criterion = 'BCELoss'
     criterion = 'BCE_and_Dice_Loss'
-    lr_schedule = {'name': 'ExponentialLR', 'gamma': 0.99}
+    # lr_schedule = {'name': 'ExponentialLR', 'gamma': 0.99}
+    lr_schedule = None
     print('loss:', criterion)
     print('optimizer:', optimizer)
     print('lr_schedule:', lr_schedule)
