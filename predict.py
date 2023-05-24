@@ -25,15 +25,14 @@ data_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_
 img_names_txt = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\data\img_names.txt'
 cfg_file = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\config.json'
 indicator_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs'
-pretrained_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\model_1\Unet.pth'
-save_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model'
-effect_path = r'runs\result\result_1\effect.json'
+pretrained_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\model\Unet.pth'
+effect_path = r'runs\result\effect.json'
 save_figure_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs\result.png'
-save_picture_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs\result\result_1'
+save_picture_path = r'C:\Users\13632\Documents\Python_Scripts\wuzhou.Tongue\Mine\Tongue_Segmentation-master\runs\result'
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print('The train will run in {} ...'.format(device))
+print('The predict will run in {} ...'.format(device))
 pretrained = True
 save_option = True
 
@@ -162,7 +161,7 @@ if __name__ == '__main__':
     print('test_data_num:', len(test_data))
 
     transformers = [
-        Mytransforms.Resize(224),
+        Mytransforms.Resize((224, 224)),
         # Mytransforms.RGBToHSV(),
         Mytransforms.ToTensor()
     ]

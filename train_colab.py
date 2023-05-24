@@ -22,13 +22,13 @@ data_path = r'/content/drive/MyDrive/Colab Notebooks/Tongue_Segmentation/data'
 img_names_txt = r'/content/drive/MyDrive/Colab Notebooks/Tongue_Segmentation/data/img_names.txt'
 cfg_file = r'/content/Tongue_Segmentation/model/config.json'
 indicator_path = r'/content/runs'
-pretrained_path = r'/content/MyDrive/Colab Notebooks/Tongue_Segmentation/model_1/Unet.pth'
+pretrained_path = r'/content/MyDrive/Colab Notebooks/Tongue_Segmentation/Unet.pth'
 save_path = r'/content/drive/MyDrive/Colab Notebooks/Tongue_Segmentation'
-save_figure_path = r'/content/drive/MyDrive/Colab Notebooks/Tongue_Segmentation/runs/result_1.png'
+save_figure_path = r'/content/drive/MyDrive/Colab Notebooks/Tongue_Segmentation/runs/result.png'
 
 learning_rate = 1e-4
 weight_decay = 1e-8
-epochs = 50
+epochs = 100
 batch_size = 32
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('The train will run in {} ...'.format(device))
