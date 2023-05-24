@@ -37,7 +37,10 @@ class ToTensor(object):
     def __call__(self, image, target=None):
         image = F.to_tensor(image)
         if target is not None:
-            target = torch.as_tensor(np.array(target), dtype=torch.int64)
+            if target.mode == 'P':
+                target = torch.as_tensor(np.array(target), dtype=torch.int64)
+            else:
+                target = F.to_tensor(target)
             return image, target
         return image
 
